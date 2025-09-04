@@ -1,0 +1,187 @@
+#' GenomicCoordinates: Main parsing function
+#'
+#' Automatically parse genomic coordinate strings into the most appropriate
+#' Bioconductor object type (GRanges, GPos, GInteractions, or IRanges).
+
+#' Parse strings into appropriate genomic objects
+#'
+#' This is the main function of the GenomicCoordinates package. It automatically
+#' detects the most appropriate object type based on the input string format
+#' and returns the corresponding Bioconductor object.
+#'
+#' @param x Character string or vector of genomic coordinates
+#' @param force_class Optional class to force ("GRanges", "GPos", "GInteractions", "IRanges")
+#' @return GRanges, GPos, GInteractions, or IRanges object
+#' @export
+#'
+#' @examples
+#' # Auto-detection examples
+#' GenomicCoordinates("chr1:1000-2000")           # Returns GRanges
+#' GenomicCoordinates("chr1:1000")                # Returns GPos  
+#' GenomicCoordinates("chr1:1-10|chr2:4-40")      # Returns GInteractions
+#' GenomicCoordinates("1000-2000")               # Returns IRanges
+#'
+#' # Force specific class
+#' GenomicCoordinates("chr1:1000", force_class = "GRanges")
+#'
+#' # Enhanced format support
+#' GenomicCoordinates("chr1:100,000-200,000")     # Comma-separated
+#' GenomicCoordinates("chr1 1000 2000")           # Space-delimited
+GenomicCoordinates <- function(x, force_class = NULL) {
+    # Input validation
+    if (is.null(x) || (length(x) == 1 && is.na(x))) {
+        stop("Input cannot be NULL or NA")
+    }
+    
+    # Check for numeric input (should error)
+    if (is.numeric(x)) {
+        stop("Numeric input not supported. Please provide character strings.")
+    }
+    
+    # Convert factors to character
+    if (is.factor(x)) {
+        x <- as.character(x)
+    }
+    
+    # Ensure input is character
+    if (!is.character(x)) {
+        stop("Input must be a character vector")
+    }
+    
+    if (length(x) == 0) {
+        if (!is.null(force_class)) {
+            return(switch(force_class,
+                "GRanges" = GRanges(),
+                "GPos" = GPos(),
+                "GInteractions" = GInteractions(),
+                "IRanges" = IRanges(),
+                stop("Unknown force_class: ", force_class)
+            ))
+        }
+        return(GRanges())  # Default empty object
+    }
+    
+    # If force_class is specified, use it directly
+    if (!is.null(force_class)) {
+        return(switch(force_class,
+            "GRanges" = as(x, "GRanges"),
+            "GPos" = as(x, "GPos"), 
+            "GInteractions" = as(x, "GInteractions"),
+            "IRanges" = as(x, "IRanges"),
+            stop("Unknown force_class: ", force_class)
+        ))
+    }
+    
+    ## Otherwise, detect the class based on the input format
+    # ...... Check for GInteractions pattern (contains |)
+    if (any(grepl("\\|", x))) {
+        return(as(x, "GInteractions"))
+    }
+    
+    # ...... Check if any string lacks chromosome information (IRanges only)
+    lacks_chr <- any(sapply(x, function(s) {
+        # Simple heuristic: if no colon and no space-separated chr, likely IRanges
+        s <- trimws(s)
+        s <- gsub("\\s+", " ", s)  # Normalize spacing
+        
+        # Check if it's a simple numeric range without chromosome info
+        if (!grepl(":", s)) {
+            # If it has space and starts with a number, check if first part looks like coordinates
+            if (grepl("\\s", s)) {
+                parts <- strsplit(s, "\\s+")[[1]]
+                # If first part is numeric (not chr name), it's likely IRanges
+                return(grepl("^[0-9,]+$", parts[1]))
+            } else {
+                # Single number or range without spaces - likely IRanges
+                return(grepl("^[0-9,.-]+$", s))
+            }
+        }
+        return(FALSE)
+    }))
+    
+    if (lacks_chr) {
+        return(as(x, "IRanges"))
+    }
+    
+    # ....... Parse strings to determine if they represent single positions
+    tryCatch({
+        parsed_list <- lapply(x, .parse_genomic_string)
+        all_single <- all(sapply(parsed_list, function(p) isTRUE(p$single)))
+        
+        # Return GPos for single positions, GRanges for ranges
+        if (all_single) {
+            return(as(x, "GPos"))
+        } else {
+            return(as(x, "GRanges"))
+        }
+    }, error = function(e) {
+        # Fallback to IRanges if genomic parsing fails
+        tryCatch({
+            return(as(x, "IRanges"))
+        }, error = function(e2) {
+            stop("Unable to parse string: ", x[1], "\nOriginal error: ", e$message)
+        })
+    })
+}
+
+# Create aliases
+GCoordinates <- GenomicCoordinates
+
+#' Detect the appropriate class for genomic strings
+#'
+#' Utility function to determine what class a genomic string should be
+#' parsed as, without actually performing the parsing.
+#'
+#' @param x Character string or vector
+#' @return Character vector of predicted classes
+#' @export
+detect_genomic_class <- function(x) {
+    result <- sapply(x, function(s) {
+        # Handle edge cases that should return "error"
+        if (is.null(s) || is.na(s) || nchar(trimws(s)) == 0 || 
+            s == " " || s == ":" || s == "|" || 
+            grepl("^:.*|.*:$", s) || grepl("^\\|.*|.*\\|$", s)) {
+            return("error")
+        }
+        
+        # GInteractions
+        if (grepl("\\|", s)) {
+            return("GInteractions")
+        }
+        
+        # IRanges (no chromosome info)
+        s <- trimws(s)
+        s <- gsub("\\s+", " ", s)  # Normalize spacing
+        
+        if (!grepl(":", s)) {
+            # Check if it's a simple numeric range without chromosome info
+            if (grepl("\\s", s)) {
+                parts <- strsplit(s, "\\s+")[[1]]
+                # If first part is numeric (not chr name), it's likely IRanges
+                if (grepl("^[0-9,]+$", parts[1])) {
+                    return("IRanges")
+                }
+            } else {
+                # Single number or range without spaces - likely IRanges
+                if (grepl("^[0-9,.-]+$", s)) {
+                    return("IRanges")
+                }
+            }
+        }
+        
+        # Try to detect single position vs range
+        tryCatch({
+            parsed <- .parse_genomic_string(s)
+            if (isTRUE(parsed$single)) {
+                return("GPos")
+            } else {
+                return("GRanges")
+            }
+        }, error = function(e) {
+            return("error")  # Return error instead of fallback
+        })
+    })
+    
+    # Remove names to return unnamed vector
+    unname(result)
+}

@@ -1,0 +1,285 @@
+---
+title: "GenomicCoordinates: Enhanced String Parsing for Genomic Coordinates"
+author: "Jacques Serizay"
+date: "`r Sys.Date()`"
+output: 
+    BiocStyle::html_document:
+        toc: true
+        toc_depth: 2
+vignette: >
+    %\VignetteIndexEntry{Introduction to HiCExperiment}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4,
+  dpi = 150
+)
+```
+
+# Introduction
+
+The standard Bioconductor packages support basic 
+coordinate strings like `IRanges("1000-2000")` and `GRanges("chr1:1000-2000")`. 
+The `GenomicCoordinates` package extends these string parsing capabilities 
+to support a wide variety of genomic coordinate string formats. In particular, 
+it support automatic detection to coerce string coordinates into the 
+most appropriate Bioconductor object type (`GRanges`, `GPos`, `GInteractions`, 
+or `IRanges`), based on the string format.
+
+In addition to the standard string format `CHR:START-END(:STRAND)`, 
+`GenomicCoordinates` adds support for:
+
+- **Comma-separated coordinates**: `"chr1:1,000-2,000"`, `"chr1:100,000-200,000"`;
+- **Space-delimited coordinates**: `"chr1 1000 2000"`;
+- **Irregular spacing**: `"chr1  1000   2000"`, `"chr1: 1-10  |  chr2: 20-30"`;
+- **Complex strings with unclear formatting**: `"chr1  1  10:+  |  chr2:20,000-30,000"`.
+
+Key `GenomicCoordinates` benefits include:
+
+1. **Broader format support**: see above;
+2. **Automatic object detection**: Get the most appropriate Bioconductor object type automatically;
+3. **Seamless integration**: Works with existing Bioconductor workflows through enhanced coercion methods;
+4. **Performance**: Supports parsing of large coordinate vectors;
+
+## Installation
+
+```{r eval=FALSE}
+# Install from Bioconductor (when available)
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GenomicCoordinates")
+
+# Or install development version from GitHub
+BiocManager::install("js2264/GenomicCoordinates")
+```
+
+## Quick start
+
+```{r}
+library(GenomicCoordinates)
+```
+
+The main function `GenomicCoordinates()` (and its alias `GCoordinates()`) 
+automatically detects the most appropriate object type and returns the 
+corresponding Bioconductor object:
+
+```{r}
+# Standard genomic ranges
+GenomicCoordinates("chr1:1000-2000")
+
+# Single positions (returns GPos)
+GenomicCoordinates("chr1:1000:-")
+
+# Genomic interactions (returns GInteractions)
+GenomicCoordinates("chr1:1-10:-|chr2:20-30:+")
+
+# Pure numeric ranges (returns IRanges)
+GenomicCoordinates("1,000-2,000")
+```
+
+# Enhanced format support
+
+## Comma-separated coordinates
+
+One of the key limitations of standard Bioconductor string parsing is the 
+lack of support for comma-separated numbers, which are commonly used in 
+genomic databases and publications.
+
+```{r}
+# GenomicCoordinates handles comma-separated numbers seamlessly
+GenomicCoordinates("chr1:100,000-200,000")
+
+# Works with single positions too
+GenomicCoordinates("chr1:1,234,567")
+
+# And with strand information
+GenomicCoordinates("chr1:100,000-200,000:+")
+```
+
+## Space-delimited coordinates
+
+Many genomic file formats and databases use space-delimited 
+coordinates. `GenomicCoordinates` supports these formats with flexible spacing:
+
+```{r}
+# Basic space-delimited format
+GenomicCoordinates("chr1 1000 2000")
+
+# Irregular spacing is handled automatically
+GenomicCoordinates("chr1    1000     2000")
+
+# Mixed format with strand
+GenomicCoordinates("chr1  1000   2000:+")
+
+# Single positions with spaces
+GenomicCoordinates("chr1 1000")
+```
+
+## Complex chromosome names
+
+Genome assemblies often contain complex chromosome names that standard 
+parsers struggle with:
+
+```{r}
+# Chromosome names with spaces (common in some organisms)
+GenomicCoordinates("chr I:1000-2000")
+
+# Scaffold and contig names
+GenomicCoordinates("scaffold_123:1000-2000")
+GenomicCoordinates("GL000001.1:1000-2000")
+
+# Organism-specific naming conventions
+GenomicCoordinates("2L:1000-2000")  # Drosophila
+GenomicCoordinates("chrUn_GL000220v1:1000-2000")  # Unplaced scaffolds
+```
+
+# Automatic object type detection
+
+One of the most powerful features of `GenomicCoordinates` is its ability 
+to automatically detect the most appropriate Bioconductor object type 
+based on the input format.
+
+## Single positions vs. ranges
+
+```{r}
+# Single positions automatically return GPos objects
+pos_result <- GenomicCoordinates("chr1:1000")
+class(pos_result)
+pos(pos_result)
+
+# Ranges return GRanges objects
+range_result <- GenomicCoordinates("chr1:1000-2000")
+class(range_result)
+start(range_result)
+end(range_result)
+```
+
+## Genomic interactions
+
+Strings containing the pipe character (`|`) are automatically parsed as genomic interactions:
+
+```{r}
+# Simple interaction
+interaction <- GenomicCoordinates("chr1:1-10|chr2:20-30")
+class(interaction)
+
+# Check the anchor points
+InteractionSet::anchors(interaction, "first")
+InteractionSet::anchors(interaction, "second")
+
+# Works with complex and formatting too
+GenomicCoordinates("chr1 1000 10000  |  chr2:20,000-30,000")
+```
+
+## IRanges for non-genomic coordinates
+
+When no chromosome information is present, the parser returns `IRanges` objects:
+
+```{r}
+# Pure numeric ranges
+numeric_range <- GenomicCoordinates("1000-2000")
+class(numeric_range)
+
+# Works with comma-separated numbers
+GenomicCoordinates("1,000-2,000")
+
+# And space-delimited format
+GenomicCoordinates("1000 2000")
+```
+
+# Forcing object types
+
+Sometimes you may want to force a specific object type, regardless of the automatic detection:
+
+```{r}
+# Force a single position to be a GRanges instead of GPos
+GenomicCoordinates("chr1:1000", force_class = "GRanges")
+
+# Force a single position to be a GPos instead of GRanges (removes the `end` coordinate)
+GenomicCoordinates("chr1:1000-2000", force_class = "GPos")
+
+# Force a genomic range to be an IRanges (extracts just coordinates)
+GenomicCoordinates("chr1:1000-2000", force_class = "IRanges")
+
+# Force a single range to be a GInteractions (creates self-interaction)
+GenomicCoordinates("chr1:1000-2000", force_class = "GInteractions")
+```
+
+# Working with vectors
+
+`GenomicCoordinates` efficiently handles vectors of coordinate strings:
+
+```{r}
+# Mixed vector of single positions and ranges
+mixed_coords <- c("chr1:1000", "chr2:2000-3000", "chr3:5000")
+GenomicCoordinates(mixed_coords)
+
+# All single positions return GPos
+single_positions <- c("chr1:1000", "chr2:2000", "chr3:3000")
+GenomicCoordinates(single_positions)
+
+# Vector of interactions
+interactions <- c("chr1:1-10|chr2:20-30", "chr3:100-200|chr4:300-400")
+GenomicCoordinates(interactions)
+```
+
+# Integration with standard Bioconductor workflows
+
+`GenomicCoordinates` seamlessly integrates with existing Bioconductor 
+workflows by extending the standard coercion methods:
+
+```{r}
+# Enhanced GRanges coercion
+as("chr1:100,000-200,000", "GRanges")
+
+# Enhanced GPos coercion  
+as("chr1:1,234,567", "GPos")
+
+# Enhanced GInteractions coercion
+as("chr1:1,000-10,000|chr2:20,000-30,000", "GInteractions")
+
+# Enhanced IRanges coercion
+as("1,000-2,000", "IRanges")
+```
+
+Of note, because it extends the `as` coercion method, the `GRanges()` function 
+from `{GenomicRanges}` package will automatically use `GenomicCoordinates` for parsing:
+
+```{r}
+GRanges("chr1:100,000-200,000") ### This would fail without GenomicCoordinates loaded
+```
+
+# Class detection without parsing
+
+The `detect_genomic_class()` function allows you to determine what object 
+type would be returned without actually performing the parsing:
+
+```{r}
+# Detect classes for various input types
+inputs <- c(
+  "chr1:1000-2000",      # GRanges
+  "chr1:1000",           # GPos
+  "chr1:1-10|chr2:20-30", # GInteractions
+  "1000-2000"            # IRanges
+)
+
+detect_genomic_class(inputs)
+```
+
+This is useful for:
+
+- Pre-processing pipelines where you need to route different input types
+- Validation of input data
+- Building user interfaces that adapt based on input format
+
+# Session Information
+
+```{r}
+sessionInfo()
+```

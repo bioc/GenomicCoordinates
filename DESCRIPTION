@@ -1,0 +1,32 @@
+Package: GenomicCoordinates
+Title: Enhanced string parsing for genomic coordinates
+Version: 0.99.0
+Authors@R:
+    c(person(given = "Jacques",
+           family = "Serizay",
+           role = c("aut", "cre"),
+           email = "jacquesserizay@gmail.com",
+           comment = c(ORCID = "0000-0002-4295-0624")))
+Description: Extends string parsing capabilities for genomic coordinates, supporting 
+    various formats including comma-separated numbers, space-delimited coordinates,
+    and automatic detection of GRanges, GPos, and GInteractions objects.
+License: Artistic-2.0
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 4.5),
+    GenomicRanges,
+    IRanges,
+    GenomeInfoDb
+Imports:
+    S4Vectors,
+    InteractionSet, 
+    methods
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    BiocStyle
+VignetteBuilder: knitr
+biocViews: Infrastructure, DataRepresentation, GenomeAnnotation
+RoxygenNote: 7.3.2
