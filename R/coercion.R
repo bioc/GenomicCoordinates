@@ -1,23 +1,68 @@
-#' Coercion methods for genomic coordinates
+#' Conversion methods for genomic coordinates
 #'
-#' Enhanced coercion methods to convert character strings to GRanges, GPos,
-#' and GInteractions objects with support for various string formats.
-#' @name GenomicCoordinates-coercion
+#' Methods to convert character strings to GRanges, GPos,
+#' and GInteractions objects with support for various string formats
+#' including comma-separated numbers and space-delimited coordinates.
+#'
+#' @param .data A character vector of genomic coordinate strings
+#' @param ... Additional arguments (unused)
+#' @param keep_mcols Ignored for character input (included for
+#'   generic compatibility with plyranges)
+#' @param keep.extra.columns Ignored for character input (included for
+#'   generic compatibility with plyinteractions)
+#' @param starts.in.df.are.0based Ignored for character input (included for
+#'   generic compatibility with plyinteractions)
+#' @return The appropriate Bioconductor object type
+#'
+#' @examples
+#' # GRanges conversion
+#' as_granges("chr1:1000-2000")
+#' as_granges("chr1:1,000-2,000:+")
+#' as_granges(c("chr1:1000-2000", "chr2:3000-4000"))
+#'
+#' # GPos conversion
+#' as_gpos("chr1:1000")
+#' as_gpos(c("chr1:1000", "chr2:2000"))
+#'
+#' # GInteractions conversion
+#' as_ginteractions("chr1:1-10|chr2:20-30")
+#'
+#' @name coercion
+NULL
 
-# Coercion from character to GRanges
-setAs("character", "GRanges", function(from) {
-    if (length(from) == 0) {
+#' Convert to GPos object
+#'
+#' Converts character strings representing single genomic positions
+#' to GPos objects.
+#'
+#' @param .data A character vector of genomic position strings
+#' @param ... Additional arguments (unused)
+#' @return A GPos object
+#' @export
+#'
+#' @examples
+#' as_gpos("chr1:1000")
+#' as_gpos("chr1:1,000:+")
+#' as_gpos(c("chr1:1000", "chr2:2000", "chr3:3000"))
+setGeneric("as_gpos", function(.data, ...) {
+    standardGeneric("as_gpos")
+})
+
+#' @rdname coercion
+#' @export
+setMethod("as_granges", "character", function(.data, ...) {
+    if (length(.data) == 0) {
         return(GRanges())
     }
-    
+
     # Handle vector of strings
-    parsed_list <- lapply(from, .parse_genomic_string)
-    
+    parsed_list <- lapply(.data, .parse_genomic_string)
+
     # Check if any are single positions (should be GPos)
     has_single <- any(sapply(parsed_list, function(x) isTRUE(x$single)))
-    
-    if (has_single && length(from) == 1) {
-        # Convert single position to GPos, but return as GRanges for compatibility
+
+    if (has_single && length(.data) == 1) {
+        # Convert single position to GRanges for compatibility
         parsed <- parsed_list[[1]]
         return(GRanges(
             seqnames = parsed$seqnames,
@@ -25,13 +70,13 @@ setAs("character", "GRanges", function(from) {
             strand = parsed$strand
         ))
     }
-    
+
     # Extract components
     seqnames <- sapply(parsed_list, function(x) x$seqnames)
     starts <- sapply(parsed_list, function(x) x$start)
     ends <- sapply(parsed_list, function(x) x$end)
     strands <- sapply(parsed_list, function(x) x$strand)
-    
+
     # Create GRanges
     GRanges(
         seqnames = seqnames,
@@ -40,20 +85,21 @@ setAs("character", "GRanges", function(from) {
     )
 })
 
-# Coercion from character to GPos
-setAs("character", "GPos", function(from) {
-    if (length(from) == 0) {
+#' @rdname coercion
+#' @export
+setMethod("as_gpos", "character", function(.data, ...) {
+    if (length(.data) == 0) {
         return(GPos())
     }
-    
+
     # Parse and check if all are single positions
-    parsed_list <- lapply(from, .parse_genomic_string)
-    
+    parsed_list <- lapply(.data, .parse_genomic_string)
+
     # Extract components
     seqnames <- sapply(parsed_list, function(x) x$seqnames)
     positions <- sapply(parsed_list, function(x) x$start)
     strands <- sapply(parsed_list, function(x) x$strand)
-    
+
     # Create GPos
     GPos(
         seqnames = seqnames,
@@ -62,14 +108,15 @@ setAs("character", "GPos", function(from) {
     )
 })
 
-# Coercion from character to GInteractions
-setAs("character", "GInteractions", function(from) {
-    if (length(from) == 0) {
+#' @rdname coercion
+#' @export
+setMethod("as_ginteractions", "character", function(.data, ...) {
+    if (length(.data) == 0) {
         return(GInteractions())
     }
-    
+
     # Handle vector of strings
-    parsed_list <- lapply(from, function(x) {
+    parsed_list <- lapply(.data, function(x) {
         # If string contains "|", parse as interaction
         if (grepl("\\|", x)) {
             return(.parse_ginteractions_string(x))
@@ -82,32 +129,32 @@ setAs("character", "GInteractions", function(from) {
             ))
         }
     })
-    
+
     # Extract anchor1 components
     anchor1_seqnames <- sapply(parsed_list, function(x) x$anchor1$seqnames)
     anchor1_starts <- sapply(parsed_list, function(x) x$anchor1$start)
     anchor1_ends <- sapply(parsed_list, function(x) x$anchor1$end)
     anchor1_strands <- sapply(parsed_list, function(x) x$anchor1$strand)
-    
+
     # Extract anchor2 components
     anchor2_seqnames <- sapply(parsed_list, function(x) x$anchor2$seqnames)
     anchor2_starts <- sapply(parsed_list, function(x) x$anchor2$start)
     anchor2_ends <- sapply(parsed_list, function(x) x$anchor2$end)
     anchor2_strands <- sapply(parsed_list, function(x) x$anchor2$strand)
-    
+
     # Create GRanges for anchors
     anchor1 <- GRanges(
         seqnames = anchor1_seqnames,
         ranges = IRanges(start = anchor1_starts, end = anchor1_ends),
         strand = anchor1_strands
     )
-    
+
     anchor2 <- GRanges(
         seqnames = anchor2_seqnames,
         ranges = IRanges(start = anchor2_starts, end = anchor2_ends),
         strand = anchor2_strands
     )
-    
+
     # Create GInteractions
     suppressWarnings(GInteractions(anchor1, anchor2))
 })

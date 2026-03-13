@@ -18,12 +18,14 @@
 #' \itemize{
 #'   \item \code{GenomicCoordinates(x)}: Main function - auto-detect and convert to appropriate type
 #'   \item \code{detect_genomic_class(x)}: Detect appropriate class without parsing
-#'   \item \code{as(x, "GRanges")}: Convert character to GRanges
-#'   \item \code{as(x, "GPos")}: Convert character to GPos
-#'   \item \code{as(x, "GInteractions")}: Convert character to GInteractions
+#'   \item \code{as_granges(x)}: Convert character to GRanges
+#'   \item \code{as_gpos(x)}: Convert character to GPos
+#'   \item \code{as_iranges(x)}: Convert character to IRanges
+#'   \item \code{as_ginteractions(x)}: Convert character to GInteractions
 #' }
 #'
-#' @name GenomicCoordinates
-#' @import GenomicRanges IRanges GenomeInfoDb S4Vectors InteractionSet
-#' @importFrom methods as
+#' @name GenomicCoordinates-package
+#' @import GenomicRanges IRanges S4Vectors InteractionSet methods
+#' @importFrom plyranges as_granges as_iranges
+#' @importFrom plyinteractions as_ginteractions
 NULL

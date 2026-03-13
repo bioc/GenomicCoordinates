@@ -64,10 +64,10 @@ GenomicCoordinates <- function(x, force_class = NULL) {
     # If force_class is specified, use it directly
     if (!is.null(force_class)) {
         return(switch(force_class,
-            "GRanges" = as(x, "GRanges"),
-            "GPos" = as(x, "GPos"), 
-            "GInteractions" = as(x, "GInteractions"),
-            "IRanges" = as(x, "IRanges"),
+            "GRanges" = as_granges(x),
+            "GPos" = as_gpos(x),
+            "GInteractions" = as_ginteractions(x),
+            "IRanges" = as_iranges(x),
             stop("Unknown force_class: ", force_class)
         ))
     }
@@ -75,7 +75,7 @@ GenomicCoordinates <- function(x, force_class = NULL) {
     ## Otherwise, detect the class based on the input format
     # ...... Check for GInteractions pattern (contains |)
     if (any(grepl("\\|", x))) {
-        return(as(x, "GInteractions"))
+        return(as_ginteractions(x))
     }
     
     # ...... Check if any string lacks chromosome information (IRanges only)
@@ -100,28 +100,30 @@ GenomicCoordinates <- function(x, force_class = NULL) {
     }))
     
     if (lacks_chr) {
-        return(as(x, "IRanges"))
+        return(as_iranges(x))
     }
     
     # ....... Parse strings to determine if they represent single positions
-    tryCatch({
-        parsed_list <- lapply(x, .parse_genomic_string)
-        all_single <- all(sapply(parsed_list, function(p) isTRUE(p$single)))
-        
-        # Return GPos for single positions, GRanges for ranges
-        if (all_single) {
-            return(as(x, "GPos"))
-        } else {
-            return(as(x, "GRanges"))
-        }
-    }, error = function(e) {
-        # Fallback to IRanges if genomic parsing fails
-        tryCatch({
-            return(as(x, "IRanges"))
-        }, error = function(e2) {
-            stop("Unable to parse string: ", x[1], "\nOriginal error: ", e$message)
-        })
+    parsed_list <- lapply(seq_along(x), function(i) {
+        tryCatch(
+            .parse_genomic_string(x[i]),
+            error = function(e) {
+                label <- if (is.na(x[i])) "NA"
+                         else if (nchar(x[i]) == 0) "<empty string>"
+                         else x[i]
+                stop("Unable to parse element ", i, " ('", label, "'): ",
+                     e$message, call. = FALSE)
+            }
+        )
     })
+    all_single <- all(sapply(parsed_list, function(p) isTRUE(p$single)))
+
+    # Return GPos for single positions, GRanges for ranges
+    if (all_single) {
+        return(as_gpos(x))
+    } else {
+        return(as_granges(x))
+    }
 }
 
 # Create aliases

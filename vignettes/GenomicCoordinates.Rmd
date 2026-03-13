@@ -44,7 +44,7 @@ Key `GenomicCoordinates` benefits include:
 
 1. **Broader format support**: see above;
 2. **Automatic object detection**: Get the most appropriate Bioconductor object type automatically;
-3. **Seamless integration**: Works with existing Bioconductor workflows through enhanced coercion methods;
+3. **Seamless integration**: Works with existing Bioconductor workflows through explicit conversion functions;
 4. **Performance**: Supports parsing of large coordinate vectors;
 
 ## Installation
@@ -229,30 +229,23 @@ interactions <- c("chr1:1-10|chr2:20-30", "chr3:100-200|chr4:300-400")
 GenomicCoordinates(interactions)
 ```
 
-# Integration with standard Bioconductor workflows
+# Explicit conversion functions
 
-`GenomicCoordinates` seamlessly integrates with existing Bioconductor 
-workflows by extending the standard coercion methods:
-
-```{r}
-# Enhanced GRanges coercion
-as("chr1:100,000-200,000", "GRanges")
-
-# Enhanced GPos coercion  
-as("chr1:1,234,567", "GPos")
-
-# Enhanced GInteractions coercion
-as("chr1:1,000-10,000|chr2:20,000-30,000", "GInteractions")
-
-# Enhanced IRanges coercion
-as("1,000-2,000", "IRanges")
-```
-
-Of note, because it extends the `as` coercion method, the `GRanges()` function 
-from `{GenomicRanges}` package will automatically use `GenomicCoordinates` for parsing:
+`GenomicCoordinates` provides explicit conversion functions that work with
+the enhanced string parsing capabilities:
 
 ```{r}
-GRanges("chr1:100,000-200,000") ### This would fail without GenomicCoordinates loaded
+# Convert to GRanges
+as_granges("chr1:100,000-200,000")
+
+# Convert to GPos
+as_gpos("chr1:1,234,567")
+
+# Convert to GInteractions
+as_ginteractions("chr1:1,000-10,000|chr2:20,000-30,000")
+
+# Convert to IRanges
+as_iranges("1,000-2,000")
 ```
 
 # Class detection without parsing

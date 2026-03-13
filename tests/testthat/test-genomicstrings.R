@@ -97,7 +97,7 @@ test_that("detect_genomic_class function works", {
 test_that("GRanges coercion works for standard formats", {
     
     for (test_string in granges_standard) {
-        result <- as(test_string, "GRanges")
+        result <- as_granges(test_string)
         expect_s4_class(result, "GRanges")
         expect_equal(length(result), 1)
     }
@@ -106,18 +106,18 @@ test_that("GRanges coercion works for standard formats", {
 test_that("GRanges coercion works for comma-separated formats", {
     
     # Test comma-separated numbers
-    result <- as("chr1:1,000-2,000", "GRanges")
+    result <- as_granges("chr1:1,000-2,000")
     expect_s4_class(result, "GRanges")
     expect_equal(start(result), 1000)
     expect_equal(end(result), 2000)
     
     # Test large numbers with commas
-    result <- as("chr1:1,000,000-2,000,000", "GRanges") 
+    result <- as_granges("chr1:1,000,000-2,000,000") 
     expect_equal(start(result), 1000000)
     expect_equal(end(result), 2000000)
     
     for (test_string in granges_comma) {
-        result <- as(test_string, "GRanges")
+        result <- as_granges(test_string)
         expect_s4_class(result, "GRanges")
         expect_equal(length(result), 1)
         expect_true(start(result) <= end(result))
@@ -126,14 +126,14 @@ test_that("GRanges coercion works for comma-separated formats", {
 
 test_that("GRanges coercion works for space-delimited formats", {
     
-    result <- as("chr1 1000 2000", "GRanges")
+    result <- as_granges("chr1 1000 2000")
     expect_s4_class(result, "GRanges")
     expect_equal(as.character(seqnames(result)), "chr1")
     expect_equal(start(result), 1000)
     expect_equal(end(result), 2000)
     
     for (test_string in granges_space) {
-        result <- as(test_string, "GRanges")
+        result <- as_granges(test_string)
         expect_s4_class(result, "GRanges")
         expect_equal(length(result), 1)
     }
@@ -142,14 +142,14 @@ test_that("GRanges coercion works for space-delimited formats", {
 test_that("GRanges coercion works for irregular spacing", {
     
     # Test space-delimited with irregular spacing
-    result <- as("chr1  1000   2000", "GRanges")
+    result <- as_granges("chr1  1000   2000")
     expect_s4_class(result, "GRanges")
     expect_equal(as.character(seqnames(result)), "chr1")
     expect_equal(start(result), 1000)
     expect_equal(end(result), 2000)
     
     # Test mixed space-colon format with strand
-    result <- as("chr1  1000   2000:+", "GRanges")
+    result <- as_granges("chr1  1000   2000:+")
     expect_s4_class(result, "GRanges")
     expect_equal(as.character(seqnames(result)), "chr1")
     expect_equal(start(result), 1000)
@@ -157,14 +157,14 @@ test_that("GRanges coercion works for irregular spacing", {
     expect_equal(as.character(strand(result)), "+")
     
     for (test_string in granges_space_irregular) {
-        result <- as(test_string, "GRanges")
+        result <- as_granges(test_string)
         expect_s4_class(result, "GRanges")
         expect_equal(length(result), 1)
         expect_true(start(result) <= end(result))
     }
     
     for (test_string in granges_mixed_spacing) {
-        result <- as(test_string, "GRanges")
+        result <- as_granges(test_string)
         expect_s4_class(result, "GRanges")
         expect_equal(length(result), 1)
         expect_true(start(result) <= end(result))
@@ -173,40 +173,40 @@ test_that("GRanges coercion works for irregular spacing", {
 
 test_that("GRanges strand handling works", {
     
-    result <- as("chr1:1000-2000:+", "GRanges")
+    result <- as_granges("chr1:1000-2000:+")
     expect_equal(as.character(strand(result)), "+")
     
-    result <- as("chr1:1000-2000:-", "GRanges") 
+    result <- as_granges("chr1:1000-2000:-") 
     expect_equal(as.character(strand(result)), "-")
     
-    result <- as("chr1:1000-2000:*", "GRanges")
+    result <- as_granges("chr1:1000-2000:*")
     expect_equal(as.character(strand(result)), "*")
 })
 
 test_that("GPos coercion works", {
     
     # Standard single position
-    result <- as("chr1:1000", "GPos")
+    result <- as_gpos("chr1:1000")
     expect_s4_class(result, "GPos")
     expect_equal(as.character(seqnames(result)), "chr1")
     expect_equal(pos(result), 1000)
     
     # Comma-separated single position
-    result <- as("chr1:1,000", "GPos")
+    result <- as_gpos("chr1:1,000")
     expect_equal(pos(result), 1000)
     
     # With strand
-    result <- as("chr1:1000:+", "GPos")
+    result <- as_gpos("chr1:1000:+")
     expect_equal(as.character(strand(result)), "+")
     
     for (test_string in gpos_standard) {
-        result <- as(test_string, "GPos")
+        result <- as_gpos(test_string)
         expect_s4_class(result, "GPos")
         expect_equal(length(result), 1)
     }
     
     for (test_string in gpos_comma) {
-        result <- as(test_string, "GPos")
+        result <- as_gpos(test_string)
         expect_s4_class(result, "GPos")
         expect_equal(length(result), 1)
     }
@@ -215,24 +215,24 @@ test_that("GPos coercion works", {
 test_that("GPos coercion works with irregular spacing", {
     
     # Test space-separated single position with irregular spacing
-    result <- as("chr1  1000", "GPos")
+    result <- as_gpos("chr1  1000")
     expect_s4_class(result, "GPos")
     expect_equal(as.character(seqnames(result)), "chr1")
     expect_equal(pos(result), 1000)
     
     # Test colon format with spaces
-    result <- as("chr1: 1000", "GPos")
+    result <- as_gpos("chr1: 1000")
     expect_s4_class(result, "GPos")
     expect_equal(pos(result), 1000)
     
     for (test_string in gpos_space_irregular) {
-        result <- as(test_string, "GPos")
+        result <- as_gpos(test_string)
         expect_s4_class(result, "GPos")
         expect_equal(length(result), 1)
     }
     
     for (test_string in gpos_mixed_spacing) {
-        result <- as(test_string, "GPos")
+        result <- as_gpos(test_string)
         expect_s4_class(result, "GPos")
         expect_equal(length(result), 1)
     }
@@ -241,7 +241,7 @@ test_that("GPos coercion works with irregular spacing", {
 test_that("GInteractions coercion works", {
     
     # Basic interaction
-    result <- as("chr1:1-10|chr2:20-30", "GInteractions")
+    result <- as_ginteractions("chr1:1-10|chr2:20-30")
     expect_s4_class(result, "GInteractions")
     expect_equal(length(result), 1)
     
@@ -256,13 +256,13 @@ test_that("GInteractions coercion works", {
     expect_equal(end(anchor2_gr), 30)
     
     for (test_string in ginteractions_standard) {
-        result <- as(test_string, "GInteractions")
+        result <- as_ginteractions(test_string)
         expect_s4_class(result, "GInteractions")
         expect_equal(length(result), 1)
     }
     
     for (test_string in ginteractions_comma) {
-        result <- as(test_string, "GInteractions")
+        result <- as_ginteractions(test_string)
         expect_s4_class(result, "GInteractions")
         expect_equal(length(result), 1)
     }
@@ -271,7 +271,7 @@ test_that("GInteractions coercion works", {
 test_that("GInteractions coercion works with irregular spacing", {
     
     # Test irregular spacing around pipe separator
-    result <- as("chr1: 1-10  |  chr2: 20-30", "GInteractions")
+    result <- as_ginteractions("chr1: 1-10  |  chr2: 20-30")
     expect_s4_class(result, "GInteractions")
     expect_equal(length(result), 1)
     
@@ -286,12 +286,12 @@ test_that("GInteractions coercion works with irregular spacing", {
     expect_equal(end(anchor2_gr), 30)
     
     # Test space-delimited coordinates with pipe
-    result <- as("chr1  1000   2000 | chr2  3000   4000", "GInteractions")
+    result <- as_ginteractions("chr1  1000   2000 | chr2  3000   4000")
     expect_s4_class(result, "GInteractions")
     expect_equal(length(result), 1)
     
     for (test_string in ginteractions_spacing) {
-        result <- as(test_string, "GInteractions")
+        result <- as_ginteractions(test_string)
         expect_s4_class(result, "GInteractions")
         expect_equal(length(result), 1)
     }
@@ -300,29 +300,29 @@ test_that("GInteractions coercion works with irregular spacing", {
 test_that("IRanges coercion works", {
     
     # Basic range
-    result <- as("1000-2000", "IRanges")
+    result <- as_iranges("1000-2000")
     expect_s4_class(result, "IRanges")
     expect_equal(start(result), 1000)
     expect_equal(end(result), 2000)
     
     # Comma-separated
-    result <- as("1,000-2,000", "IRanges")
+    result <- as_iranges("1,000-2,000")
     expect_equal(start(result), 1000)
     expect_equal(end(result), 2000)
     
     # Space-separated 
-    result <- as("1000 2000", "IRanges")
+    result <- as_iranges("1000 2000")
     expect_equal(start(result), 1000)
     expect_equal(end(result), 2000)
     
     for (test_string in iranges_standard) {
-        result <- as(test_string, "IRanges")
+        result <- as_iranges(test_string)
         expect_s4_class(result, "IRanges")
         expect_equal(length(result), 1)
     }
     
     for (test_string in iranges_comma) {
-        result <- as(test_string, "IRanges")
+        result <- as_iranges(test_string)
         expect_s4_class(result, "IRanges")
         expect_equal(length(result), 1)
     }
@@ -331,18 +331,18 @@ test_that("IRanges coercion works", {
 test_that("Multiple element vectors work", {
     
     # Multiple GRanges
-    result <- as(multi_element_cases$granges, "GRanges")
+    result <- as_granges(multi_element_cases$granges)
     expect_s4_class(result, "GRanges")
     expect_equal(length(result), 3)
     expect_equal(as.character(seqnames(result)), c("chr1", "chr2", "chrX"))
     
     # Multiple GPos
-    result <- as(multi_element_cases$gpos, "GPos")
+    result <- as_gpos(multi_element_cases$gpos)
     expect_s4_class(result, "GPos")
     expect_equal(length(result), 3)
     
     # Multiple IRanges
-    result <- as(multi_element_cases$iranges, "IRanges")
+    result <- as_iranges(multi_element_cases$iranges)
     expect_s4_class(result, "IRanges")
     expect_equal(length(result), 3)
 })
@@ -350,18 +350,18 @@ test_that("Multiple element vectors work", {
 test_that("Edge cases are handled correctly", {
     
     # Single base range
-    result <- as("chr1:1000-1000", "GRanges")
+    result <- as_granges("chr1:1000-1000")
     expect_equal(start(result), 1000)
     expect_equal(end(result), 1000)
     expect_equal(width(result), 1)
     
     # Zero start (should work)
-    result <- as("chr1:0-100", "GRanges")
+    result <- as_granges("chr1:0-100")
     expect_equal(start(result), 0)
     expect_equal(end(result), 100)
     
     for (test_string in edge_cases) {
-        result <- as(test_string, "GRanges")
+        result <- as_granges(test_string)
         expect_s4_class(result, "GRanges")
         expect_equal(length(result), 1)
     }
@@ -370,10 +370,10 @@ test_that("Edge cases are handled correctly", {
 test_that("Empty inputs are handled", {
     
     expect_s4_class(GenomicCoordinates(character(0)), "GRanges")
-    expect_s4_class(as(character(0), "GRanges"), "GRanges")
-    expect_s4_class(as(character(0), "GPos"), "GPos")
-    expect_s4_class(as(character(0), "IRanges"), "IRanges")
-    expect_s4_class(as(character(0), "GInteractions"), "GInteractions")
+    expect_s4_class(as_granges(character(0)), "GRanges")
+    expect_s4_class(as_gpos(character(0)), "GPos")
+    expect_s4_class(as_iranges(character(0)), "IRanges")
+    expect_s4_class(as_ginteractions(character(0)), "GInteractions")
     
     expect_equal(length(GenomicCoordinates(character(0))), 0)
 })
@@ -381,10 +381,10 @@ test_that("Empty inputs are handled", {
 test_that("Error cases fail appropriately", {
     
     # These should throw errors
-    expect_error(as("invalid_string", "GRanges"))
-    expect_error(as("chr1:", "GRanges"))
-    expect_error(as(":1000-2000", "GRanges"))
-    expect_error(as("chr1:abc-def", "GRanges"))
+    expect_error(as_granges("invalid_string"))
+    expect_error(as_granges("chr1:"))
+    expect_error(as_granges(":1000-2000"))
+    expect_error(as_granges("chr1:abc-def"))
 })
 
 

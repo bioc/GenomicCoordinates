@@ -13,15 +13,16 @@ Description: Extends string parsing capabilities for genomic coordinates, suppor
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
-Depends: 
+Depends:
     R (>= 4.5),
     GenomicRanges,
-    IRanges,
-    GenomeInfoDb
+    IRanges
 Imports:
     S4Vectors,
-    InteractionSet, 
-    methods
+    InteractionSet,
+    methods,
+    plyranges,
+    plyinteractions
 Suggests:
     testthat (>= 3.0.0),
     knitr,
@@ -29,4 +30,4 @@ Suggests:
     BiocStyle
 VignetteBuilder: knitr
 biocViews: Infrastructure, DataRepresentation, GenomeAnnotation
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
