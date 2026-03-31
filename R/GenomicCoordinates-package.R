@@ -32,7 +32,7 @@
 #' @keywords internal
 "_PACKAGE"
 
-#' @import GenomicRanges IRanges S4Vectors InteractionSet methods
+#' @import GenomicRanges IRanges S4Vectors InteractionSet Seqinfo methods
 #' @importFrom plyranges as_granges as_iranges
 #' @importFrom plyinteractions as_ginteractions
 NULL
