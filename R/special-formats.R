@@ -18,7 +18,7 @@
         "^[^:\\s]+\\s+[0-9,\\s]+$"  # chr1 1000 (space-separated single position)
     )
     
-    any(sapply(patterns, function(p) grepl(p, x)))
+    any(vapply(patterns, function(p) grepl(p, x), logical(1)))
 }
 
 #' Handle special genomic string formats

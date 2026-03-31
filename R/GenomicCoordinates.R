@@ -79,14 +79,16 @@ GenomicCoordinates <- function(x, force_class = NULL) {
     }
     
     # ...... Check if any string lacks chromosome information (IRanges only)
-    lacks_chr <- any(sapply(x, function(s) {
-        # Simple heuristic: if no colon and no space-separated chr, likely IRanges
+    lacks_chr <- any(vapply(x, function(s) {
+        # Simple heuristic: if no colon and no
+        # space-separated chr, likely IRanges
         s <- trimws(s)
         s <- gsub("\\s+", " ", s)  # Normalize spacing
         
         # Check if it's a simple numeric range without chromosome info
         if (!grepl(":", s)) {
-            # If it has space and starts with a number, check if first part looks like coordinates
+            # If it has space and starts with a number,
+            # check if first part looks like coordinates
             if (grepl("\\s", s)) {
                 parts <- strsplit(s, "\\s+")[[1]]
                 # If first part is numeric (not chr name), it's likely IRanges
@@ -97,8 +99,8 @@ GenomicCoordinates <- function(x, force_class = NULL) {
             }
         }
         return(FALSE)
-    }))
-    
+    }, logical(1)))
+
     if (lacks_chr) {
         return(as_iranges(x))
     }
@@ -116,7 +118,11 @@ GenomicCoordinates <- function(x, force_class = NULL) {
             }
         )
     })
-    all_single <- all(sapply(parsed_list, function(p) isTRUE(p$single)))
+    all_single <- all(vapply(
+        parsed_list,
+        function(p) isTRUE(p$single),
+        logical(1)
+    ))
 
     # Return GPos for single positions, GRanges for ranges
     if (all_single) {
@@ -138,7 +144,7 @@ GCoordinates <- GenomicCoordinates
 #' @return Character vector of predicted classes
 #' @export
 detect_genomic_class <- function(x) {
-    result <- sapply(x, function(s) {
+    result <- vapply(x, function(s) {
         # Handle edge cases that should return "error"
         if (is.null(s) || is.na(s) || nchar(trimws(s)) == 0 || 
             s == " " || s == ":" || s == "|" || 
@@ -182,7 +188,7 @@ detect_genomic_class <- function(x) {
         }, error = function(e) {
             return("error")  # Return error instead of fallback
         })
-    })
+    }, character(1))
     
     # Remove names to return unnamed vector
     unname(result)

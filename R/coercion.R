@@ -59,7 +59,11 @@ setMethod("as_granges", "character", function(.data, ...) {
     parsed_list <- lapply(.data, .parse_genomic_string)
 
     # Check if any are single positions (should be GPos)
-    has_single <- any(sapply(parsed_list, function(x) isTRUE(x$single)))
+    has_single <- any(vapply(
+        parsed_list,
+        function(x) isTRUE(x$single),
+        logical(1)
+    ))
 
     if (has_single && length(.data) == 1) {
         # Convert single position to GRanges for compatibility
@@ -72,10 +76,10 @@ setMethod("as_granges", "character", function(.data, ...) {
     }
 
     # Extract components
-    seqnames <- sapply(parsed_list, function(x) x$seqnames)
-    starts <- sapply(parsed_list, function(x) x$start)
-    ends <- sapply(parsed_list, function(x) x$end)
-    strands <- sapply(parsed_list, function(x) x$strand)
+    seqnames <- vapply(parsed_list, function(x) x$seqnames, character(1))
+    starts <- vapply(parsed_list, function(x) x$start, numeric(1))
+    ends <- vapply(parsed_list, function(x) x$end, numeric(1))
+    strands <- vapply(parsed_list, function(x) x$strand, character(1))
 
     # Create GRanges
     GRanges(
@@ -96,9 +100,9 @@ setMethod("as_gpos", "character", function(.data, ...) {
     parsed_list <- lapply(.data, .parse_genomic_string)
 
     # Extract components
-    seqnames <- sapply(parsed_list, function(x) x$seqnames)
-    positions <- sapply(parsed_list, function(x) x$start)
-    strands <- sapply(parsed_list, function(x) x$strand)
+    seqnames <- vapply(parsed_list, function(x) x$seqnames, character(1))
+    positions <- vapply(parsed_list, function(x) x$start, numeric(1))
+    strands <- vapply(parsed_list, function(x) x$strand, character(1))
 
     # Create GPos
     GPos(
@@ -131,16 +135,40 @@ setMethod("as_ginteractions", "character", function(.data, ...) {
     })
 
     # Extract anchor1 components
-    anchor1_seqnames <- sapply(parsed_list, function(x) x$anchor1$seqnames)
-    anchor1_starts <- sapply(parsed_list, function(x) x$anchor1$start)
-    anchor1_ends <- sapply(parsed_list, function(x) x$anchor1$end)
-    anchor1_strands <- sapply(parsed_list, function(x) x$anchor1$strand)
+    anchor1_seqnames <- vapply(
+        parsed_list, function(x) x$anchor1$seqnames,
+        character(1)
+    )
+    anchor1_starts <- vapply(
+        parsed_list, function(x) x$anchor1$start,
+        numeric(1)
+    )
+    anchor1_ends <- vapply(
+        parsed_list, function(x) x$anchor1$end,
+        numeric(1)
+    )
+    anchor1_strands <- vapply(
+        parsed_list, function(x) x$anchor1$strand,
+        character(1)
+    )
 
     # Extract anchor2 components
-    anchor2_seqnames <- sapply(parsed_list, function(x) x$anchor2$seqnames)
-    anchor2_starts <- sapply(parsed_list, function(x) x$anchor2$start)
-    anchor2_ends <- sapply(parsed_list, function(x) x$anchor2$end)
-    anchor2_strands <- sapply(parsed_list, function(x) x$anchor2$strand)
+    anchor2_seqnames <- vapply(
+        parsed_list, function(x) x$anchor2$seqnames,
+        character(1)
+    )
+    anchor2_starts <- vapply(
+        parsed_list, function(x) x$anchor2$start,
+        numeric(1)
+    )
+    anchor2_ends <- vapply(
+        parsed_list, function(x) x$anchor2$end,
+        numeric(1)
+    )
+    anchor2_strands <- vapply(
+        parsed_list, function(x) x$anchor2$strand,
+        character(1)
+    )
 
     # Create GRanges for anchors
     anchor1 <- GRanges(
