@@ -41,8 +41,8 @@
                 coord_part <- space_parts[2]
                 
                 # Clean and parse coordinate
-                position <- suppressWarnings(as.numeric(gsub(",", "", trimws(coord_part))))
-                
+                position <- .as_numeric(gsub(",", "", trimws(coord_part)))
+
                 if (!is.na(position)) {
                     return(list(
                         seqnames = seqname,
@@ -75,7 +75,7 @@
             }
             
             # Clean and parse coordinate (remove commas and extra spaces)
-            position <- suppressWarnings(as.numeric(gsub("[,\\s]", "", trimws(coord_part))))
+            position <- .as_numeric(gsub("[,\\s]", "", trimws(coord_part)))
             
             if (!is.na(position)) {
                 return(list(

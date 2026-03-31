@@ -183,6 +183,13 @@ setMethod("as_ginteractions", "character", function(.data, ...) {
         strand = anchor2_strands
     )
 
+    # Standardize seqlevels before creating GInteractions
+    all_seqlevels <- union(
+        seqlevels(anchor1), seqlevels(anchor2)
+    )
+    seqlevels(anchor1) <- all_seqlevels
+    seqlevels(anchor2) <- all_seqlevels
+
     # Create GInteractions
-    suppressWarnings(GInteractions(anchor1, anchor2))
+    GInteractions(anchor1, anchor2)
 })

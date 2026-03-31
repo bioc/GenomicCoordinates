@@ -14,6 +14,16 @@
     gsub(",", "", x)
 }
 
+# Safe numeric conversion without suppressWarnings
+.as_numeric <- function(x) {
+    x <- trimws(x)
+    if (grepl("^[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?$", x)) {
+        as.numeric(x)
+    } else {
+        NA_real_
+    }
+}
+
 # Helper function to parse coordinate ranges with various separators
 .parse_coordinates <- function(coord_str) {
     # Clean the coordinate string
@@ -33,8 +43,8 @@
             parts <- strsplit(clean_str, sep)[[1]]
             parts <- parts[parts != ""]  # Remove empty strings
             if (length(parts) == 2) {
-                start_pos <- suppressWarnings(as.numeric(trimws(parts[1])))
-                end_pos <- suppressWarnings(as.numeric(trimws(parts[2])))
+                start_pos <- .as_numeric(trimws(parts[1]))
+                end_pos <- .as_numeric(trimws(parts[2]))
                 
                 # Validate that both are numeric
                 if (!is.na(start_pos) && !is.na(end_pos)) {
@@ -66,7 +76,7 @@
     }
     
     # If no separator found, try to parse as single position
-    single_pos <- suppressWarnings(as.numeric(trimws(clean_str)))
+    single_pos <- .as_numeric(trimws(clean_str))
     if (!is.na(single_pos)) {
         # Check for negative coordinates
         if (single_pos < 0) {
