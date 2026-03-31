@@ -10,7 +10,8 @@
 #' and returns the corresponding Bioconductor object.
 #'
 #' @param x Character string or vector of genomic coordinates
-#' @param force_class Optional class to force ("GRanges", "GPos", "GInteractions", "IRanges")
+#' @param force_class Optional class to force
+#'   ("GRanges", "GPos", "GInteractions", "IRanges")
 #' @return GRanges, GPos, GInteractions, or IRanges object
 #' @export
 #'
@@ -110,11 +111,18 @@ GenomicCoordinates <- function(x, force_class = NULL) {
         tryCatch(
             .parse_genomic_string(x[i]),
             error = function(e) {
-                label <- if (is.na(x[i])) "NA"
-                         else if (nchar(x[i]) == 0) "<empty string>"
-                         else x[i]
-                stop("Unable to parse element ", i, " ('", label, "'): ",
-                     e$message, call. = FALSE)
+                if (is.na(x[i])) {
+                    label <- "NA"
+                } else if (nchar(x[i]) == 0) {
+                    label <- "<empty string>"
+                } else {
+                    label <- x[i]
+                }
+                stop(
+                    "Unable to parse element ",
+                    i, " ('", label, "'): ",
+                    e$message, call. = FALSE
+                )
             }
         )
     })
@@ -143,6 +151,11 @@ GCoordinates <- GenomicCoordinates
 #' @param x Character string or vector
 #' @return Character vector of predicted classes
 #' @export
+#'
+#' @examples
+#' detect_genomic_class("chr1:1000-2000")
+#' detect_genomic_class("chr1:1000")
+#' detect_genomic_class(c("chr1:1-10|chr2:20-30", "1000-2000"))
 detect_genomic_class <- function(x) {
     result <- vapply(x, function(s) {
         # Handle edge cases that should return "error"

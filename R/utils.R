@@ -20,7 +20,8 @@
     clean_str <- .clean_numeric_string(coord_str)
     
     # Input validation
-    if (is.null(clean_str) || is.na(clean_str) || nchar(trimws(clean_str)) == 0) {
+    if (is.null(clean_str) || is.na(clean_str) ||
+        nchar(trimws(clean_str)) == 0) {
         stop("Unable to parse coordinates: ", coord_str)
     }
     
@@ -39,7 +40,10 @@
                 if (!is.na(start_pos) && !is.na(end_pos)) {
                     # Check for invalid ranges (end before start)
                     if (end_pos < start_pos) {
-                        stop("End coordinate cannot be less than start coordinate")
+                        stop(
+                            "End coordinate cannot be ",
+                            "less than start coordinate"
+                        )
                     }
                     result <- list(start = start_pos, end = end_pos)
                     # Only add single=TRUE if it's actually a single position
@@ -102,13 +106,18 @@
         return(special_result)
     }
     
-    # Check for mixed space-colon format: "chr1  1      1000:+"
-    # This handles cases where there are spaces before coordinates and strand after colon
+    # Check for mixed space-colon format
+    # e.g. "chr1  1      1000:+"
+    # Handles spaces before coordinates,
+    # strand after colon
     if (grepl("^[^:]+\\s+[0-9].*:[*+-]?$", x)) {
         # Split by colon to separate strand
         colon_parts <- strsplit(x, ":")[[1]]
         coord_strand_part <- colon_parts[1]
-        strand <- if (length(colon_parts) >= 2 && colon_parts[2] != "") colon_parts[2] else "*"
+        strand <- if (
+            length(colon_parts) >= 2 &&
+            colon_parts[2] != ""
+        ) colon_parts[2] else "*"
         
         # Parse the coordinate part which has spaces
         space_parts <- strsplit(trimws(coord_strand_part), "\\s+")[[1]]
@@ -118,13 +127,15 @@
             start_coord <- space_parts[2]
             end_coord <- space_parts[3]
             
-            coords <- .parse_coordinates(paste(start_coord, end_coord, sep = "-"))
+            coords <- .parse_coordinates(
+                paste(start_coord, end_coord, sep = "-")
+            )
             return(list(
                 seqnames = seqname,
                 start = coords$start,
                 end = coords$end,
                 strand = strand,
-                single = coords$single  # This will be TRUE or NULL
+                single = coords$single
             ))
         }
     }
@@ -133,23 +144,25 @@
     parts <- strsplit(x, ":")[[1]]
     
     if (length(parts) < 2) {
-        # Try space-delimited format: "chr1 1 10" or "chr1  1     10"
+        # Try space-delimited format
         space_parts <- strsplit(trimws(x), "\\s+")[[1]]
         if (length(space_parts) >= 3) {
             seqname <- space_parts[1]
             start_coord <- space_parts[2]
             end_coord <- space_parts[3]
             
-            coords <- .parse_coordinates(paste(start_coord, end_coord, sep = "-"))
+            coords <- .parse_coordinates(
+                paste(start_coord, end_coord, sep = "-")
+            )
             return(list(
                 seqnames = seqname,
                 start = coords$start,
                 end = coords$end,
                 strand = "*",
-                single = coords$single  # This will be TRUE or NULL
+                single = coords$single
             ))
         } else if (length(space_parts) == 2) {
-            # Handle "chr1 1000" format (single position with space)
+            # Handle "chr1 1000" format
             seqname <- space_parts[1]
             position <- space_parts[2]
             
@@ -167,13 +180,19 @@
     }
     
     # Validate we have chromosome and coordinate parts
-    if (length(parts) < 2 || nchar(trimws(parts[1])) == 0 || nchar(trimws(parts[2])) == 0) {
+    if (length(parts) < 2 ||
+        nchar(trimws(parts[1])) == 0 ||
+        nchar(trimws(parts[2])) == 0) {
         stop("Invalid genomic string format: ", x)
     }
 
     seqname <- trimws(parts[1])
     coord_part <- trimws(parts[2])
-    strand <- if (length(parts) >= 3) trimws(parts[3]) else "*"
+    strand <- if (length(parts) >= 3) {
+        trimws(parts[3])
+    } else {
+        "*"
+    }
     
     # Validate strand
     if (!strand %in% c("+", "-", "*")) {
@@ -193,7 +212,7 @@
         start = coords$start,
         end = coords$end,
         strand = strand,
-        single = coords$single  # This will be TRUE or NULL
+        single = coords$single
     ))
 }
 

@@ -64,7 +64,11 @@
             
             if (strand_match > 0) {
                 coord_part <- substr(coord_strand, 1, strand_match - 1)
-                strand <- trimws(substr(coord_strand, strand_match, nchar(coord_strand)))
+                strand <- trimws(substr(
+                    coord_strand,
+                    strand_match,
+                    nchar(coord_strand)
+                ))
             } else {
                 coord_part <- coord_strand
                 strand <- "*"

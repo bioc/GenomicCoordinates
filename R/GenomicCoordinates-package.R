@@ -1,9 +1,12 @@
-#' GenomicCoordinates: Enhanced string parsing for genomic coordinates
+#' GenomicCoordinates: Enhanced string parsing for genomic
+#' coordinates
 #'
-#' The GenomicCoordinates package extends the string parsing capabilities for genomic
-#' coordinates in Bioconductor. It supports various string formats including
-#' comma-separated numbers, space-delimited coordinates, and automatically
-#' detects whether to return GRanges, GPos, or GInteractions objects.
+#' The GenomicCoordinates package extends the string parsing
+#' capabilities for genomic coordinates in Bioconductor. It
+#' supports various string formats including comma-separated
+#' numbers, space-delimited coordinates, and automatically
+#' detects whether to return GRanges, GPos, or GInteractions
+#' objects.
 #'
 #' @section Supported formats:
 #' \itemize{
@@ -16,15 +19,19 @@
 #'
 #' @section Main functions:
 #' \itemize{
-#'   \item \code{GenomicCoordinates(x)}: Main function - auto-detect and convert to appropriate type
-#'   \item \code{detect_genomic_class(x)}: Detect appropriate class without parsing
+#'   \item \code{GenomicCoordinates(x)}: Main function -
+#'     auto-detect and convert to appropriate type
+#'   \item \code{detect_genomic_class(x)}: Detect
+#'     appropriate class without parsing
 #'   \item \code{as_granges(x)}: Convert character to GRanges
 #'   \item \code{as_gpos(x)}: Convert character to GPos
 #'   \item \code{as_iranges(x)}: Convert character to IRanges
 #'   \item \code{as_ginteractions(x)}: Convert character to GInteractions
 #' }
 #'
-#' @name GenomicCoordinates-package
+#' @keywords internal
+"_PACKAGE"
+
 #' @import GenomicRanges IRanges S4Vectors InteractionSet methods
 #' @importFrom plyranges as_granges as_iranges
 #' @importFrom plyinteractions as_ginteractions

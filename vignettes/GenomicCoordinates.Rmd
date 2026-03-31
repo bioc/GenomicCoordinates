@@ -7,18 +7,18 @@ output:
         toc: true
         toc_depth: 2
 vignette: >
-    %\VignetteIndexEntry{Introduction to HiCExperiment}
+    %\VignetteIndexEntry{Introduction to GenomicCoordinates}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 6,
-  fig.height = 4,
-  dpi = 150
+    collapse = TRUE,
+    comment = "#>",
+    fig.width = 6,
+    fig.height = 4,
+    dpi = 150
 )
 ```
 
@@ -35,10 +35,13 @@ or `IRanges`), based on the string format.
 In addition to the standard string format `CHR:START-END(:STRAND)`, 
 `GenomicCoordinates` adds support for:
 
-- **Comma-separated coordinates**: `"chr1:1,000-2,000"`, `"chr1:100,000-200,000"`;
+- **Comma-separated coordinates**:
+    `"chr1:1,000-2,000"`,
+    `"chr1:100,000-200,000"`;
 - **Space-delimited coordinates**: `"chr1 1000 2000"`;
 - **Irregular spacing**: `"chr1  1000   2000"`, `"chr1: 1-10  |  chr2: 20-30"`;
-- **Complex strings with unclear formatting**: `"chr1  1  10:+  |  chr2:20,000-30,000"`.
+- **Complex strings with unclear formatting**:
+    `"chr1  1  10:+  |  chr2:20,000-30,000"`.
 
 Key `GenomicCoordinates` benefits include:
 
@@ -49,7 +52,7 @@ Key `GenomicCoordinates` benefits include:
 
 ## Installation
 
-```{r eval=FALSE}
+```{r install, eval=FALSE}
 # Install from Bioconductor (when available)
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -61,7 +64,7 @@ BiocManager::install("js2264/GenomicCoordinates")
 
 ## Quick start
 
-```{r}
+```{r load-library}
 library(GenomicCoordinates)
 ```
 
@@ -69,7 +72,7 @@ The main function `GenomicCoordinates()` (and its alias `GCoordinates()`)
 automatically detects the most appropriate object type and returns the 
 corresponding Bioconductor object:
 
-```{r}
+```{r auto-detection}
 # Standard genomic ranges
 GenomicCoordinates("chr1:1000-2000")
 
@@ -91,7 +94,7 @@ One of the key limitations of standard Bioconductor string parsing is the
 lack of support for comma-separated numbers, which are commonly used in 
 genomic databases and publications.
 
-```{r}
+```{r comma-separated}
 # GenomicCoordinates handles comma-separated numbers seamlessly
 GenomicCoordinates("chr1:100,000-200,000")
 
@@ -107,7 +110,7 @@ GenomicCoordinates("chr1:100,000-200,000:+")
 Many genomic file formats and databases use space-delimited 
 coordinates. `GenomicCoordinates` supports these formats with flexible spacing:
 
-```{r}
+```{r space-delimited}
 # Basic space-delimited format
 GenomicCoordinates("chr1 1000 2000")
 
@@ -126,7 +129,7 @@ GenomicCoordinates("chr1 1000")
 Genome assemblies often contain complex chromosome names that standard 
 parsers struggle with:
 
-```{r}
+```{r complex-chr-names}
 # Chromosome names with spaces (common in some organisms)
 GenomicCoordinates("chr I:1000-2000")
 
@@ -147,7 +150,7 @@ based on the input format.
 
 ## Single positions vs. ranges
 
-```{r}
+```{r single-vs-ranges}
 # Single positions automatically return GPos objects
 pos_result <- GenomicCoordinates("chr1:1000")
 class(pos_result)
@@ -162,9 +165,10 @@ end(range_result)
 
 ## Genomic interactions
 
-Strings containing the pipe character (`|`) are automatically parsed as genomic interactions:
+Strings containing the pipe character (`|`) are
+automatically parsed as genomic interactions:
 
-```{r}
+```{r genomic-interactions}
 # Simple interaction
 interaction <- GenomicCoordinates("chr1:1-10|chr2:20-30")
 class(interaction)
@@ -181,7 +185,7 @@ GenomicCoordinates("chr1 1000 10000  |  chr2:20,000-30,000")
 
 When no chromosome information is present, the parser returns `IRanges` objects:
 
-```{r}
+```{r iranges-non-genomic}
 # Pure numeric ranges
 numeric_range <- GenomicCoordinates("1000-2000")
 class(numeric_range)
@@ -195,13 +199,15 @@ GenomicCoordinates("1000 2000")
 
 # Forcing object types
 
-Sometimes you may want to force a specific object type, regardless of the automatic detection:
+Sometimes you may want to force a specific object
+type, regardless of the automatic detection:
 
-```{r}
+```{r force-class}
 # Force a single position to be a GRanges instead of GPos
 GenomicCoordinates("chr1:1000", force_class = "GRanges")
 
-# Force a single position to be a GPos instead of GRanges (removes the `end` coordinate)
+# Force a single position to be a GPos
+# instead of GRanges (removes the `end` coordinate)
 GenomicCoordinates("chr1:1000-2000", force_class = "GPos")
 
 # Force a genomic range to be an IRanges (extracts just coordinates)
@@ -215,7 +221,7 @@ GenomicCoordinates("chr1:1000-2000", force_class = "GInteractions")
 
 `GenomicCoordinates` efficiently handles vectors of coordinate strings:
 
-```{r}
+```{r vector-input}
 # Mixed vector of single positions and ranges
 mixed_coords <- c("chr1:1000", "chr2:2000-3000", "chr3:5000")
 GenomicCoordinates(mixed_coords)
@@ -234,7 +240,7 @@ GenomicCoordinates(interactions)
 `GenomicCoordinates` provides explicit conversion functions that work with
 the enhanced string parsing capabilities:
 
-```{r}
+```{r explicit-conversion}
 # Convert to GRanges
 as_granges("chr1:100,000-200,000")
 
@@ -253,13 +259,13 @@ as_iranges("1,000-2,000")
 The `detect_genomic_class()` function allows you to determine what object 
 type would be returned without actually performing the parsing:
 
-```{r}
+```{r class-detection}
 # Detect classes for various input types
 inputs <- c(
-  "chr1:1000-2000",      # GRanges
-  "chr1:1000",           # GPos
-  "chr1:1-10|chr2:20-30", # GInteractions
-  "1000-2000"            # IRanges
+    "chr1:1000-2000",
+    "chr1:1000",
+    "chr1:1-10|chr2:20-30",
+    "1000-2000"
 )
 
 detect_genomic_class(inputs)
@@ -273,6 +279,6 @@ This is useful for:
 
 # Session Information
 
-```{r}
+```{r session-info}
 sessionInfo()
 ```

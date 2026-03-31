@@ -6,9 +6,16 @@
 #' @param .data Object to convert
 #' @param ... Additional arguments passed to methods
 #' @param keep_mcols Logical; whether to keep metadata columns (plyranges)
-#' @param keep.extra.columns Logical; whether to keep extra columns (plyinteractions)
-#' @param starts.in.df.are.0based Logical; whether starts are 0-based (plyinteractions)
+#' @param keep.extra.columns Logical; whether to keep
+#'   extra columns (plyinteractions)
+#' @param starts.in.df.are.0based Logical; whether starts
+#'   are 0-based (plyinteractions)
 #' @return A Bioconductor object
+#'
+#' @examples
+#' as_granges("chr1:1000-2000")
+#' as_iranges("1000-2000")
+#' as_ginteractions("chr1:1-10|chr2:20-30")
 #'
 #' @importFrom plyranges as_granges
 #' @export
