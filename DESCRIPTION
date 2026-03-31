@@ -20,6 +20,7 @@ Depends:
     IRanges
 Imports:
     S4Vectors,
+    Seqinfo,
     InteractionSet,
     methods,
     plyranges,
