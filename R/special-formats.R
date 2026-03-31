@@ -14,8 +14,8 @@
     # Check various patterns that indicate single position
     patterns <- c(
         "^[^:]+:[0-9,\\s]+$",  # chr1:1000 or chr1:1,000 or chr1: 1000
-        "^[^:]+:[0-9,\\s]+\\s*[*+-]\\s*$",  # chr1:1000 + or chr1:1000 * (with possible spaces)
-        "^[^:\\s]+\\s+[0-9,\\s]+$"  # chr1 1000 (space-separated single position)
+        "^[^:]+:[0-9,\\s]+\\s*[*+-]\\s*$",
+        "^[^:\\s]+\\s+[0-9,\\s]+$"
     )
     
     any(vapply(patterns, function(p) grepl(p, x), logical(1)))
