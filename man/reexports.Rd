@@ -25,9 +25,11 @@ as_ginteractions(
 
 \item{keep_mcols}{Logical; whether to keep metadata columns (plyranges)}
 
-\item{keep.extra.columns}{Logical; whether to keep extra columns (plyinteractions)}
+\item{keep.extra.columns}{Logical; whether to keep
+extra columns (plyinteractions)}
 
-\item{starts.in.df.are.0based}{Logical; whether starts are 0-based (plyinteractions)}
+\item{starts.in.df.are.0based}{Logical; whether starts
+are 0-based (plyinteractions)}
 }
 \value{
 A Bioconductor object
@@ -35,4 +37,10 @@ A Bioconductor object
 \description{
 These generics are re-exported from plyranges and plyinteractions
 to provide conversion functions for character strings.
+}
+\examples{
+as_granges("chr1:1000-2000")
+as_iranges("1000-2000")
+as_ginteractions("chr1:1-10|chr2:20-30")
+
 }

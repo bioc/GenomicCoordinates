@@ -12,7 +12,8 @@ Description: Extends string parsing capabilities for genomic coordinates, suppor
     and automatic detection of GRanges, GPos, and GInteractions objects.
 License: Artistic-2.0
 Encoding: UTF-8
-LazyData: true
+URL: https://github.com/js2264/GenomicCoordinates
+BugReports: https://github.com/js2264/GenomicCoordinates/issues
 Depends:
     R (>= 4.5),
     GenomicRanges,

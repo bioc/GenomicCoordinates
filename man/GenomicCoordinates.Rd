@@ -9,7 +9,8 @@ GenomicCoordinates(x, force_class = NULL)
 \arguments{
 \item{x}{Character string or vector of genomic coordinates}
 
-\item{force_class}{Optional class to force ("GRanges", "GPos", "GInteractions", "IRanges")}
+\item{force_class}{Optional class to force
+("GRanges", "GPos", "GInteractions", "IRanges")}
 }
 \value{
 GRanges, GPos, GInteractions, or IRanges object

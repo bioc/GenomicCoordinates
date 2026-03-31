@@ -16,3 +16,8 @@ Character vector of predicted classes
 Utility function to determine what class a genomic string should be
 parsed as, without actually performing the parsing.
 }
+\examples{
+detect_genomic_class("chr1:1000-2000")
+detect_genomic_class("chr1:1000")
+detect_genomic_class(c("chr1:1-10|chr2:20-30", "1000-2000"))
+}
