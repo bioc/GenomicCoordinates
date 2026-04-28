@@ -1,6 +1,6 @@
 Package: GenomicCoordinates
 Title: Enhanced string parsing for genomic coordinates
-Version: 0.99.3
+Version: 1.0.0
 Authors@R:
     c(person(given = "Jacques",
            family = "Serizay",
